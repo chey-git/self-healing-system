@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Self-Healing Database Dashboard</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+  <header>
+    <h1>🧠 AI-Powered Self-Healing Database System</h1>
+    <p>Smart anomaly detection • Auto-healing • MongoDB Insights</p>
+  </header>
+
+  <main>
+    <section class="ai-status">
+      <div class="ai-indicator" id="aiIndicator">
+        🤖 AI Agent <span id="aiStatus">Active & Monitoring</span>
+      </div>
+    </section>
+
+    <div class="healing-animation hidden" id="healingEffect">
+      <div class="pulse-circle"></div>
+      <p>🩺 Healing in Progress...</p>
+    </div>
+
+  
+    <section class="stats">
+      <div class="card">
+        <h2>CPU Usage</h2>
+        <p id="cpu" class="metric">--</p>
+        <span>%</span>
+      </div>
+      <div class="card">
+        <h2>Latency</h2>
+        <p id="latency" class="metric">--</p>
+        <span>ms</span>
+      </div>
+      <div class="card status-card">
+        <h2>Status</h2>
+        <p id="status" class="metric green">Normal ✅</p>
+        <p id="action" class="subtext">System Stable</p>
+      </div>
+    </section>
+  
+    <section class="chart-section">
+      <canvas id="chart"></canvas>
+    </section>
+  
+    <section class="controls">
+      <button id="healBtn" class="btn heal">⚙️ Manual Heal</button>
+      <button id="downloadBtn" class="btn download">📥 Download Logs</button>
+    </section>
+  
+    <section class="logs">
+      <h2>Activity Logs</h2>
+      <ul id="log-list"></ul>
+    </section>
+  </main>
+
+  <audio id="alert-sound"
+    src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_744e66d071.mp3?filename=alert-102550.mp3"></audio>
+
+  <footer>
+    <p>© 2025 Self-Healing AI | Powered by AIML + MongoDB</p>
+  </footer>
+
+  <script src="script.js"></script>
+  <div id="healingEffect" class="healing-animation"></div>
+
+</body>
+
+</html>
