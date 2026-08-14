@@ -131,23 +131,23 @@ async function evaluateMetrics(metrics) {
     return result;
   }
 
-  if (state.criticalCount >= 1) {
+  if (state.criticalCount >= 2) {
     result.level = "Critical";
     result.action = "Restarted database service automatically";
     state.criticalCount = 0;
     state.cooldownActive = true;
     setTimeout(() => {
       state.cooldownActive = false;
-    }, 10000);
+    }, 30000);
     await addLog(result.level, result.action, metrics.cpuUsage, metrics.latency);
-  } else if (state.warningCount >= 1) {
+  } else if (state.warningCount >= 2) {
     result.level = "Warning";
     result.action = "Killed slow queries automatically";
     state.warningCount = 0;
     state.cooldownActive = true;
     setTimeout(() => {
       state.cooldownActive = false;
-    }, 10000);
+    }, 30000);
     await addLog(result.level, result.action, metrics.cpuUsage, metrics.latency);
   }
 
