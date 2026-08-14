@@ -113,7 +113,7 @@ function resetCounters() {
   state.criticalCount = 0;
 }
 
-function evaluateMetrics(metrics) {
+async function evaluateMetrics(metrics) {
   const result = {
     ...metrics,
     level: "Normal",
@@ -124,7 +124,7 @@ function evaluateMetrics(metrics) {
   if (anomalyDetected) {
     result.level = "AI-Detected";
     result.action = "AI Agent initiated self-healing";
-    addLog(result.level, result.action, metrics.cpuUsage, metrics.latency);
+    await addLog(result.level, result.action, metrics.cpuUsage, metrics.latency);
   }
 
   if (metrics.cpuUsage > 75 || metrics.latency > 220) {
@@ -150,7 +150,7 @@ function evaluateMetrics(metrics) {
     setTimeout(() => {
       state.cooldownActive = false;
     }, 10000);
-    addLog(result.level, result.action, metrics.cpuUsage, metrics.latency);
+    await addLog(result.level, result.action, metrics.cpuUsage, metrics.latency);
   } else if (state.warningCount >= 1) {
     result.level = "Warning";
     result.action = "Killed slow queries automatically";
@@ -159,7 +159,7 @@ function evaluateMetrics(metrics) {
     setTimeout(() => {
       state.cooldownActive = false;
     }, 10000);
-    addLog(result.level, result.action, metrics.cpuUsage, metrics.latency);
+    await addLog(result.level, result.action, metrics.cpuUsage, metrics.latency);
   }
 
   return result;
