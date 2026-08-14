@@ -37,8 +37,8 @@ function sendJson(res, status, payload) {
 }
 
 function generateMetrics() {
-  const cpuUsage = Math.floor(Math.random() * 60) + 40;
-  const latency = Math.floor(Math.random() * 450) + 50;
+  const cpuUsage = Math.floor(Math.random() * 70) + 30;
+  const latency = Math.floor(Math.random() * 250) + 80;
   const errors = Math.floor(Math.random() * 10);
 
   return {
@@ -101,10 +101,10 @@ function evaluateMetrics(metrics) {
     addLog(result.level, result.action, metrics.cpuUsage, metrics.latency);
   }
 
-  if (metrics.cpuUsage > 85 || metrics.latency > 400) {
+  if (metrics.cpuUsage > 75 || metrics.latency > 220) {
     state.criticalCount += 1;
     state.warningCount = 0;
-  } else if (metrics.cpuUsage > 70 || metrics.latency > 250) {
+  } else if (metrics.cpuUsage > 60 || metrics.latency > 160) {
     state.warningCount += 1;
     state.criticalCount = 0;
   } else {
@@ -116,23 +116,23 @@ function evaluateMetrics(metrics) {
     return result;
   }
 
-  if (state.criticalCount >= 3) {
+  if (state.criticalCount >= 2) {
     result.level = "Critical";
     result.action = "Restarted database service automatically";
     state.criticalCount = 0;
     state.cooldownActive = true;
     setTimeout(() => {
       state.cooldownActive = false;
-    }, 30000);
+    }, 20000);
     addLog(result.level, result.action, metrics.cpuUsage, metrics.latency);
-  } else if (state.warningCount >= 3) {
+  } else if (state.warningCount >= 2) {
     result.level = "Warning";
     result.action = "Killed slow queries automatically";
     state.warningCount = 0;
     state.cooldownActive = true;
     setTimeout(() => {
       state.cooldownActive = false;
-    }, 30000);
+    }, 20000);
     addLog(result.level, result.action, metrics.cpuUsage, metrics.latency);
   }
 
