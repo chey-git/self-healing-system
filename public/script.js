@@ -58,6 +58,9 @@ const chart = new Chart(ctx, {
 
 let allLogs = [];
 let lastLogTimestamp = null;
+let autoRefreshEnabled = true;
+let metricsIntervalId = null;
+let logsIntervalId = null;
 
 function updateHealthScore() {
   if (metricsHistory.length === 0) return;
@@ -121,6 +124,107 @@ function updateEventCount() {
   eventCountEl.textContent = eventCount;
 }
 
+function updateGauges(cpuUsage, latency) {
+  // Update CPU gauge
+  const cpuPercentage = Math.min(100, cpuUsage);
+  const cpuCircumference = 283;
+  const cpuOffset = cpuCircumference - (cpuPercentage / 100) * cpuCircumference;
+  
+  const cpuGaugeEl = document.getElementById("cpuGauge");
+  if (cpuGaugeEl) {
+    cpuGaugeEl.style.strokeDashoffset = cpuOffset;
+    cpuGaugeEl.style.stroke = cpuUsage > 80 ? "#f87171" : cpuUsage > 60 ? "#fbbf24" : "#34d399";
+  }
+  
+  document.getElementById("cpuGaugeValue").textContent = cpuUsage + "%";
+  
+  // Update Latency health bar
+  const maxLatency = 500;
+  const healthPercentage = Math.max(0, 100 - (latency / maxLatency) * 100);
+  const latencyBar = document.getElementById("latencyHealthBar");
+  if (latencyBar) {
+    latencyBar.style.width = healthPercentage + "%";
+    latencyBar.style.background = 
+      latency > 350 ? "linear-gradient(90deg, #f87171, #dc2626)" :
+      latency > 250 ? "linear-gradient(90deg, #fbbf24, #f59e0b)" :
+      "linear-gradient(90deg, #34d399, #22c55e)";
+  }
+  
+  document.getElementById("latencyHealthValue").textContent = 
+    latency > 350 ? "Critical" :
+    latency > 250 ? "Warning" :
+    "Excellent";
+  
+  // Update System Load bar
+  const avgLoad = metricsHistory.length > 0 ?
+    Math.round(metricsHistory.reduce((a, m) => a + m.cpuUsage, 0) / metricsHistory.length) : 0;
+  
+  const loadBar = document.getElementById("systemLoadBar");
+  if (loadBar) {
+    loadBar.style.width = Math.min(100, avgLoad) + "%";
+    loadBar.className = avgLoad > 80 ? "load-bar critical" :
+                        avgLoad > 60 ? "load-bar warning" :
+                        "load-bar normal";
+  }
+  
+  document.getElementById("systemLoadValue").textContent = 
+    avgLoad > 80 ? "Critical" :
+    avgLoad > 60 ? "High" :
+    avgLoad > 40 ? "Medium" :
+    "Low";
+}
+
+function updateAlerts(cpuUsage, latency) {
+  const alertsSection = document.getElementById("alertSection");
+  const alertsList = document.getElementById("alertsList");
+  const alerts = [];
+  
+  if (cpuUsage > 85) {
+    alerts.push({
+      level: "🚨 Critical",
+      message: "CPU usage is critically high (" + cpuUsage + "%)"
+    });
+  }
+  if (latency > 350) {
+    alerts.push({
+      level: "🚨 Critical",
+      message: "Latency exceeds critical threshold (" + latency + "ms)"
+    });
+  }
+  if (cpuUsage > 70 || latency > 250) {
+    alerts.push({
+      level: "⚠️ Warning",
+      message: "System performance is degrading"
+    });
+  }
+  
+  if (alerts.length > 0) {
+    alertsSection.style.display = "block";
+    alertsList.innerHTML = alerts.map(alert => 
+      `<div class="alert-item">
+         <p style="color: ${alert.level.includes("🚨") ? "#fca5a5" : "#fcd34d"};"><strong>${alert.level}</strong></p>
+         <p style="color: #cbd5e1;">${alert.message}</p>
+       </div>`
+    ).join("");
+  } else {
+    alertsSection.style.display = "none";
+  }
+}
+
+function toggleAutoRefresh() {
+  autoRefreshEnabled = !autoRefreshEnabled;
+  const btn = document.getElementById("refreshToggle");
+  btn.textContent = "🔄 Auto-Refresh: " + (autoRefreshEnabled ? "ON" : "OFF");
+  
+  if (autoRefreshEnabled) {
+    metricsIntervalId = setInterval(fetchMetrics, 5000);
+    logsIntervalId = setInterval(fetchLogs, 8000);
+  } else {
+    clearInterval(metricsIntervalId);
+    clearInterval(logsIntervalId);
+  }
+}
+
 function showNotification(title, message, icon = "ℹ️") {
   if ("Notification" in window && Notification.permission === "granted") {
     new Notification(title, {
@@ -178,6 +282,8 @@ async function fetchMetrics() {
     if (metricsHistory.length > MAX_HISTORY) metricsHistory.shift();
     updateHealthScore();
     updateDetectionLatency();
+    updateGauges(cpuUsage, latency);
+    updateAlerts(cpuUsage, latency);
 
     let status = "✅ Normal";
     let action = "System Stable";
@@ -290,5 +396,8 @@ downloadBtn.addEventListener("click", () => {
 requestNotificationPermission();
 fetchLogs(true);
 fetchMetrics();
-setInterval(fetchMetrics, 5000);
-setInterval(fetchLogs, 8000);
+metricsIntervalId = setInterval(fetchMetrics, 5000);
+logsIntervalId = setInterval(fetchLogs, 8000);
+
+// Add refresh toggle
+document.getElementById("refreshToggle").addEventListener("click", toggleAutoRefresh);

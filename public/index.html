@@ -20,6 +20,9 @@
       <div class="ai-indicator" id="aiIndicator">
         🤖 AI Agent <span id="aiStatus">Active & Monitoring</span>
       </div>
+      <div style="margin-left: 20px;">
+        <button id="refreshToggle" class="refresh-btn">🔄 Auto-Refresh: ON</button>
+      </div>
     </section>
 
     <div class="healing-animation hidden" id="healingEffect">
@@ -83,6 +86,74 @@
 
     <section class="chart-section">
       <canvas id="chart"></canvas>
+    </section>
+
+    <section class="stats">
+      <div class="card gauge-card">
+        <h2>CPU Load Gauge</h2>
+        <div class="gauge-container">
+          <svg class="gauge" viewBox="0 0 100 100">
+            <defs>
+              <linearGradient id="gaugeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:#34d399;stop-opacity:1" />
+                <stop offset="100%" style="stop-color:#22c55e;stop-opacity:1" />
+              </linearGradient>
+            </defs>
+            <circle class="gauge-background" cx="50" cy="50" r="45"></circle>
+            <circle class="gauge-progress" cx="50" cy="50" r="45" id="cpuGauge"></circle>
+          </svg>
+          <p id="cpuGaugeValue" class="gauge-value">0%</p>
+        </div>
+      </div>
+
+      <div class="card gauge-card">
+        <h2>Latency Health</h2>
+        <div class="gauge-container">
+          <div class="health-bar">
+            <div class="health-fill" id="latencyHealthBar"></div>
+          </div>
+          <p id="latencyHealthValue" class="gauge-value">Excellent</p>
+        </div>
+      </div>
+
+      <div class="card gauge-card">
+        <h2>System Load Index</h2>
+        <div class="gauge-container">
+          <div class="load-indicator">
+            <div class="load-bar normal" id="systemLoadBar"></div>
+          </div>
+          <p id="systemLoadValue" class="gauge-value">Low</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="alert-section" id="alertSection" style="display:none;">
+      <h2>🚨 Critical Alerts</h2>
+      <div id="alertsList" class="alerts-list"></div>
+    </section>
+
+    <section class="specs-section">
+      <div class="card">
+        <h2>Database Connection</h2>
+        <div class="connection-status">
+          <div class="status-dot" id="dbStatus"></div>
+          <p id="dbStatusText">Connected to MongoDB Atlas</p>
+        </div>
+      </div>
+      <div class="card">
+        <h2>API Status</h2>
+        <div class="connection-status">
+          <div class="status-dot active"></div>
+          <p>All endpoints operational</p>
+        </div>
+      </div>
+      <div class="card">
+        <h2>Monitoring Status</h2>
+        <div class="connection-status">
+          <div class="status-dot active"></div>
+          <p>Real-time monitoring active</p>
+        </div>
+      </div>
     </section>
 
     <section class="controls">
