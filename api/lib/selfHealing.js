@@ -38,34 +38,23 @@ function sendJson(res, status, payload) {
 }
 
 function generateMetrics() {
-  state.demoIndex += 1;
-  const cycle = state.demoIndex % 5;
+  // Generate realistic metrics that vary but trend toward issues
+  const shouldBeHigh = Math.random() < 0.6; // 60% chance of high values
 
   let cpuUsage;
   let latency;
-  let errors;
 
-  if (cycle === 0) {
-    cpuUsage = 95;
-    latency = 420;
-    errors = 9;
-  } else if (cycle === 1) {
-    cpuUsage = 82;
-    latency = 310;
-    errors = 6;
-  } else if (cycle === 2) {
-    cpuUsage = 68;
-    latency = 180;
-    errors = 2;
-  } else if (cycle === 3) {
-    cpuUsage = 88;
-    latency = 330;
-    errors = 7;
+  if (shouldBeHigh) {
+    // High stress scenario with variation
+    cpuUsage = Math.floor(Math.random() * 30) + 75; // 75-105
+    latency = Math.floor(Math.random() * 200) + 220; // 220-420
   } else {
-    cpuUsage = 56;
-    latency = 140;
-    errors = 1;
+    // Normal scenario with some variation
+    cpuUsage = Math.floor(Math.random() * 30) + 40; // 40-70
+    latency = Math.floor(Math.random() * 100) + 80; // 80-180
   }
+
+  const errors = Math.floor(Math.random() * 10);
 
   return {
     cpuUsage,
