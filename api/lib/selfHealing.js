@@ -1,0 +1,131 @@
+const { detectAnomaly } = require("../../backend/aiAgent");
+
+const state = {
+  logs: [],
+  warningCount: 0,
+  criticalCount: 0,
+  cooldownActive: false,
+};
+
+function sendJson(res, status, payload) {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  res.status(status).json(payload);
+}
+
+function generateMetrics() {
+  const cpuUsage = Math.floor(Math.random() * 60) + 40;
+  const latency = Math.floor(Math.random() * 450) + 50;
+  const errors = Math.floor(Math.random() * 10);
+
+  return {
+    cpuUsage,
+    latency,
+    errors,
+    timestamp: new Date().toISOString(),
+  };
+}
+
+function addLog(level, action, cpu, latency) {
+  const entry = {
+    level,
+    action,
+    cpu,
+    latency,
+    timestamp: new Date().toISOString(),
+  };
+
+  state.logs.unshift(entry);
+  state.logs = state.logs.slice(0, 20);
+  return entry;
+}
+
+function getLogs() {
+  return state.logs;
+}
+
+function resetCounters() {
+  state.warningCount = 0;
+  state.criticalCount = 0;
+}
+
+function evaluateMetrics(metrics) {
+  const result = {
+    ...metrics,
+    level: "Normal",
+    action: "System stable",
+  };
+
+  const anomalyDetected = detectAnomaly(metrics);
+  if (anomalyDetected) {
+    result.level = "AI-Detected";
+    result.action = "AI Agent initiated self-healing";
+    addLog(result.level, result.action, metrics.cpuUsage, metrics.latency);
+  }
+
+  if (metrics.cpuUsage > 85 || metrics.latency > 400) {
+    state.criticalCount += 1;
+    state.warningCount = 0;
+  } else if (metrics.cpuUsage > 70 || metrics.latency > 250) {
+    state.warningCount += 1;
+    state.criticalCount = 0;
+  } else {
+    resetCounters();
+  }
+
+  if (state.cooldownActive) {
+    result.level = result.level === "Normal" ? "Normal" : result.level;
+    return result;
+  }
+
+  if (state.criticalCount >= 3) {
+    result.level = "Critical";
+    result.action = "Restarted database service automatically";
+    state.criticalCount = 0;
+    state.cooldownActive = true;
+    setTimeout(() => {
+      state.cooldownActive = false;
+    }, 30000);
+    addLog(result.level, result.action, metrics.cpuUsage, metrics.latency);
+  } else if (state.warningCount >= 3) {
+    result.level = "Warning";
+    result.action = "Killed slow queries automatically";
+    state.warningCount = 0;
+    state.cooldownActive = true;
+    setTimeout(() => {
+      state.cooldownActive = false;
+    }, 30000);
+    addLog(result.level, result.action, metrics.cpuUsage, metrics.latency);
+  }
+
+  return result;
+}
+
+function triggerManualHeal() {
+  const healActions = [
+    "Restarted database services successfully.",
+    "Rebuilt indexes and optimized queries.",
+    "Cleared cache and improved performance.",
+    "Scaled database cluster to handle load.",
+    "Reconnected replica nodes and synced data.",
+  ];
+
+  const action = healActions[Math.floor(Math.random() * healActions.length)];
+  addLog("Manual", action, Math.floor(Math.random() * 100), Math.floor(Math.random() * 500));
+
+  return {
+    status: "Healing Completed ✅",
+    action,
+    timestamp: new Date().toISOString(),
+  };
+}
+
+module.exports = {
+  generateMetrics,
+  evaluateMetrics,
+  getLogs,
+  addLog,
+  triggerManualHeal,
+  sendJson,
+};
