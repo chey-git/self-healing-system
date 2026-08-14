@@ -8,6 +8,9 @@
     "start": "vercel dev",
     "build": "echo \"No build step required for this static app.\""
   },
+  "dependencies": {
+    "mongodb": "^6.9.0"
+  },
   "devDependencies": {
     "vercel": "^34.2.0"
   }

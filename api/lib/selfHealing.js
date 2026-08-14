@@ -1,3 +1,4 @@
+const { MongoClient } = require("mongodb");
 const { detectAnomaly } = require("../../backend/aiAgent");
 
 const state = {
@@ -6,6 +7,27 @@ const state = {
   criticalCount: 0,
   cooldownActive: false,
 };
+
+let clientPromise = null;
+
+function getMongoClient() {
+  if (!process.env.MONGODB_URI) {
+    return null;
+  }
+
+  if (!clientPromise) {
+    clientPromise = new MongoClient(process.env.MONGODB_URI).connect();
+  }
+
+  return clientPromise;
+}
+
+async function getLogCollection() {
+  const client = await getMongoClient();
+  if (!client) return null;
+  const db = client.db(process.env.MONGODB_DB_NAME || "selfHealingDB");
+  return db.collection("healing_logs");
+}
 
 function sendJson(res, status, payload) {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -27,7 +49,7 @@ function generateMetrics() {
   };
 }
 
-function addLog(level, action, cpu, latency) {
+async function addLog(level, action, cpu, latency) {
   const entry = {
     level,
     action,
@@ -36,12 +58,27 @@ function addLog(level, action, cpu, latency) {
     timestamp: new Date().toISOString(),
   };
 
+  const collection = await getLogCollection();
+  if (collection) {
+    await collection.insertOne(entry);
+    const logs = await collection.find({}).sort({ timestamp: -1 }).limit(20).toArray();
+    state.logs = logs;
+    return entry;
+  }
+
   state.logs.unshift(entry);
   state.logs = state.logs.slice(0, 20);
   return entry;
 }
 
-function getLogs() {
+async function getLogs() {
+  const collection = await getLogCollection();
+  if (collection) {
+    const logs = await collection.find({}).sort({ timestamp: -1 }).limit(20).toArray();
+    state.logs = logs;
+    return logs;
+  }
+
   return state.logs;
 }
 
@@ -102,7 +139,7 @@ function evaluateMetrics(metrics) {
   return result;
 }
 
-function triggerManualHeal() {
+async function triggerManualHeal() {
   const healActions = [
     "Restarted database services successfully.",
     "Rebuilt indexes and optimized queries.",
@@ -112,7 +149,7 @@ function triggerManualHeal() {
   ];
 
   const action = healActions[Math.floor(Math.random() * healActions.length)];
-  addLog("Manual", action, Math.floor(Math.random() * 100), Math.floor(Math.random() * 500));
+  await addLog("Manual", action, Math.floor(Math.random() * 100), Math.floor(Math.random() * 500));
 
   return {
     status: "Healing Completed ✅",
