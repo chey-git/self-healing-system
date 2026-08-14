@@ -1,21 +1,14 @@
 {
-  "name": "backend",
+  "name": "self-healing-system",
+  "private": true,
   "version": "1.0.0",
-  "description": "",
-  "main": "server.js",
+  "description": "AI-powered self-healing database dashboard",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
+    "dev": "vercel dev",
+    "start": "vercel dev",
+    "build": "echo \"No build step required for this static app.\""
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "cors": "^2.8.5",
-    "express": "^5.1.0",
-    "ml-matrix": "^6.12.1",
-    "ml-regression": "^6.3.0",
-    "mongoose": "^8.19.2",
-    "node-notifier": "^10.0.1"
+  "devDependencies": {
+    "vercel": "^34.2.0"
   }
 }

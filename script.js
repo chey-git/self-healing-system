@@ -9,7 +9,7 @@ const downloadBtn = document.getElementById("downloadBtn");
 const healBtn = document.getElementById("healBtn");
 const healingEffect = document.getElementById("healingEffect"); // healing animation box
 
-const BASE_URL = "http://localhost:5000";
+const API_BASE = window.location.origin;
 
 // ------------------- CHART.JS SETUP -------------------
 const ctx = document.getElementById("chart").getContext("2d");
@@ -60,7 +60,7 @@ function triggerHealingAnimation(duration = 6000, message = "Healing in progress
 // ------------------- FETCH METRICS -------------------
 async function fetchMetrics() {
   try {
-    const res = await fetch(`${BASE_URL}/metrics`);
+    const res = await fetch(`${API_BASE}/api/metrics`);
     const data = await res.json();
 
     const { cpuUsage, latency, level } = data;
@@ -127,7 +127,7 @@ async function fetchMetrics() {
 // ------------------- FETCH LOGS -------------------
 async function fetchLogs(initial = false) {
   try {
-    const res = await fetch(`${BASE_URL}/logs`);
+    const res = await fetch(`${API_BASE}/api/logs`);
     const logs = await res.json();
 
     if (initial) {
@@ -153,7 +153,7 @@ async function fetchLogs(initial = false) {
 // ------------------- MANUAL HEAL -------------------
 healBtn.addEventListener("click", async () => {
   try {
-    const res = await fetch(`${BASE_URL}/heal`, { method: "POST" });
+    const res = await fetch(`${API_BASE}/api/heal`, { method: "POST" });
     const data = await res.json();
 
     actionText.textContent = data.action;
