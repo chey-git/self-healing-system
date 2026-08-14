@@ -1,6 +1,6 @@
 const { generateMetrics, evaluateMetrics, sendJson } = require("./lib/selfHealing");
 
-module.exports = (req, res) => {
+module.exports = async (req, res) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
@@ -16,6 +16,6 @@ module.exports = (req, res) => {
   }
 
   const metrics = generateMetrics();
-  const result = evaluateMetrics(metrics);
+  const result = await evaluateMetrics(metrics);
   sendJson(res, 200, result);
 };
